@@ -8,7 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="8.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MySqlToolkit">
+      <HintPath>..\..\MySqlToolkit\bin\Debug\net6.0\MySqlToolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 using HomeCloud_Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using HomeCloud_Server.Services;
 
 namespace HomeCloud_Server.Controllers
 {
@@ -8,30 +9,36 @@ namespace HomeCloud_Server.Controllers
     [Route("[controller]")]
     public class FileController : ControllerBase
     {
+        private readonly DatabaseService _databaseService;
         private readonly ILogger<FileController> _logger;
 
-        public FileController(ILogger<FileController> logger)
+        public FileController(ILogger<FileController> logger, DatabaseService databaseService)
         {
             _logger = logger;
+            _databaseService = databaseService;
         }
 
         [HttpGet("GetFileTester")]
-        public File Get(int FileID)
+        public async Task<Models.File> Get(int FileID)
         {
-            //TODO: MAKE THIS ACTUALLY USEFUL
-            return new File
+            Models.File testFile = new Models.File
             {
                 FileID = FileID,
                 FileName = "TestFile.json",
                 MIMEType = "applicaiton/json",
-                CreatedOn = DateTime.Now,
+                CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds,
                 PathToData = "C:/users/jason/data/53408275.data"
             };
+            await _databaseService.AddNewFileAsync(testFile);
+            //TODO: MAKE THIS ACTUALLY USEFUL
+            return testFile;
         }
 
         [HttpPost("UploadFile"), DisableRequestSizeLimit]
         public async Task<IActionResult> Post(List<IFormFile> files)
         {
+            // GET THE FILE AND SAVE IT
+
             long size = files.Sum(f => f.Length); //Get total file size in bytes
             List<string> filePaths = new List<string>();
             foreach(var formFile in files) //Get each file in turn
