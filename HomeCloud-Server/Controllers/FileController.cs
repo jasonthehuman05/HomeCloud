@@ -18,6 +18,11 @@ namespace HomeCloud_Server.Controllers
             _databaseService = databaseService;
         }
 
+        /// <summary>
+        /// Test function. Not to be used for final prod
+        /// </summary>
+        /// <param name="FileID"></param>
+        /// <returns></returns>
         [HttpGet("GetFileTester")]
         public async Task<Models.File> Get(int FileID)
         {
