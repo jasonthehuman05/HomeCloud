@@ -1,4 +1,4 @@
-﻿namespace HomeCloud_Server
+﻿namespace HomeCloud_Server.Models
 {
     public class File
     {
