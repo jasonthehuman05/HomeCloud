@@ -2,6 +2,7 @@ using HomeCloud_Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using HomeCloud_Server.Services;
+using Microsoft.Extensions.Options;
 
 namespace HomeCloud_Server.Controllers
 {
@@ -10,12 +11,14 @@ namespace HomeCloud_Server.Controllers
     public class FileController : ControllerBase
     {
         private readonly DatabaseService _databaseService;
+        private readonly IOptions<ConfigurationService> _configService;
         private readonly ILogger<FileController> _logger;
 
-        public FileController(ILogger<FileController> logger, DatabaseService databaseService)
+        public FileController(ILogger<FileController> logger, DatabaseService databaseService, IOptions<ConfigurationService> configurationService)
         {
             _logger = logger;
             _databaseService = databaseService;
+            _configService = configurationService;
         }
 
         /// <summary>
@@ -39,27 +42,50 @@ namespace HomeCloud_Server.Controllers
             return testFile;
         }
 
+
+        /// <summary>
+        /// Takes an upload of files and stores them for use
+        /// </summary>
+        /// <param name="files">the IFormFile(s) to be stored</param>
+        /// <returns></returns>
         [HttpPost("UploadFile"), DisableRequestSizeLimit]
         public async Task<IActionResult> Post(List<IFormFile> files)
         {
-            // GET THE FILE AND SAVE IT
-
             long size = files.Sum(f => f.Length); //Get total file size in bytes
-            List<string> filePaths = new List<string>();
+            List<Models.File> FileList = new List<Models.File>();
+            
             foreach(var formFile in files) //Get each file in turn
             {
                 if(formFile.Length > 0) //Proceed if it is not empty
                 {
-                    var filePath = Path.GetTempFileName(); //Get temp path
-                    filePaths.Add(filePath);
-                    using (var stream = new FileStream(filePath, FileMode.Create)) //Create filestream in temp dir, creating a new file
+                    string newFilePath;
+                    while (true)
+                    {
+                        newFilePath = Utils.GenerateRandomString(16); //Generate a 16 character random file name
+                        if (!System.IO.File.Exists(newFilePath)){ break; }
+                    }
+                    using (var stream = new FileStream(_configService.Value.FileHostingPath + newFilePath, FileMode.Create)) //Create filestream in temp dir, creating a new file
                     {
                         await formFile.CopyToAsync(stream); //copy all data from the file to the new temp file stream
                     }
+
+                    FileList.Add(new Models.File()
+                    {
+                        FileName = formFile.Name,
+                        MIMEType = formFile.ContentType,
+                        CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds, //Current Time
+                        PathToData = newFilePath
+                    });
                 }
             }
+            //File was added to the dir
+            //Add file to the database
+            foreach (Models.File item in FileList)
+            {
+                await _databaseService.AddNewFileAsync(item); 
+            }
 
-            return Ok(new {count = files.Count, size, filePaths});
+            return Ok(new {count = files.Count, size});
         }
     }
 }

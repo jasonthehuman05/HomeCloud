@@ -14,8 +14,10 @@ namespace HomeCloud_Server
             builder.Services.AddControllers();
 
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
-
             builder.Services.AddSingleton<DatabaseService>();
+
+            builder.Services.Configure<ConfigurationService>(builder.Configuration.GetSection("ConfigurationSettings"));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
