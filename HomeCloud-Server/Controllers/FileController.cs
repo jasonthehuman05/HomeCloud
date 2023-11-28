@@ -49,7 +49,7 @@ namespace HomeCloud_Server.Controllers
         /// <param name="files">the IFormFile(s) to be stored</param>
         /// <returns></returns>
         [HttpPost("UploadFile"), DisableRequestSizeLimit]
-        public async Task<IActionResult> Post(List<IFormFile> files)
+        public async Task<IActionResult> UploadFile(List<IFormFile> files)
         {
             long size = files.Sum(f => f.Length); //Get total file size in bytes
             List<Models.File> FileList = new List<Models.File>();
@@ -88,23 +88,27 @@ namespace HomeCloud_Server.Controllers
             return Ok(new {count = files.Count, size});
         }
 
+        /// <summary>
+        /// Retrieves file information from the database and loads the file, allowing the client to download it
+        /// </summary>
+        /// <param name="FileID">The ID to utilise</param>
+        /// <returns></returns>
         [HttpGet("RetrieveFile")]
-        public IActionResult DownloadFile(int FileID)
+        public async Task<IActionResult> DownloadFile(int FileID)
         {
-            Models.File file = new Models.File
-            {
-                FileID=FileID,
-                FileName="JasonFile.png",
-                MIMEType="image/png",
-                CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds,
-                PathToData= "C:\\xampp\\htdocs\\test.png"
-            };
+            //retrieve the file details from the database
+            Models.File file = await _databaseService.GetFileAsync(FileID);
 
-            if (!System.IO.File.Exists(file.PathToData))
+            //Does the provided file exist in the directory?
+            if (!System.IO.File.Exists(_configService.Value.GetAbsoluteFilePath(file.PathToData)))
             {
-                return NotFound();
+                return NotFound(new { path = _configService.Value.GetAbsoluteFilePath(file.PathToData) });
             }
-            Stream fileStream = System.IO.File.OpenRead(file.PathToData);
+            
+            //Open a file stream to get the data from the file
+            Stream fileStream = System.IO.File.OpenRead(_configService.Value.GetAbsoluteFilePath(file.PathToData));
+            
+            //Create the FileResult object to use in the response, applying the correct file name and mime type
             FileResult fileResult = File(fileStream, file.MIMEType, file.FileName);
             return fileResult;
         }

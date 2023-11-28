@@ -1,5 +1,4 @@
 ﻿using HomeCloud_Server.Models;
-using HomeCloud_Server.Services.MySqlInteractionToolkit;
 using Microsoft.Extensions.Options;
 using MySql.Data;
 using MySql.Data.MySqlClient;
@@ -31,9 +30,15 @@ namespace HomeCloud_Server.Services
         public async Task AddNewFileAsync(Models.File file)
         {
             //Insert into the db
-            // MySqlToolkit.InsertData<Models.File>("tblFiles", file);
             di.InsertData<Models.File>("tblfiles", file);
             return;
+        }
+
+        public async Task<Models.File> GetFileAsync(int FileID)
+        {
+            List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles WHERE FileID={FileID}");
+            Debug.WriteLine("Retrieved " + retrievedFiles.Count + " files");
+            return retrievedFiles[0];
         }
 
         #endregion
