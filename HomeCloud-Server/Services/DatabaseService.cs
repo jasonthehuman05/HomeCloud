@@ -41,6 +41,11 @@ namespace HomeCloud_Server.Services
             return retrievedFiles[0];
         }
 
+        public async void DeleteFileAsync(int FileID)
+        {
+            di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
+        }
+
         #endregion
     }
 }

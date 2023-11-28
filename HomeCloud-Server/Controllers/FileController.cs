@@ -112,5 +112,26 @@ namespace HomeCloud_Server.Controllers
             FileResult fileResult = File(fileStream, file.MIMEType, file.FileName);
             return fileResult;
         }
+
+        /// <summary>
+        /// Deletes a file from the server, using a provided ID
+        /// </summary>
+        /// <param name="FileID"></param>
+        /// <returns></returns>
+        [HttpDelete("DeleteFile")]
+        public async Task<IActionResult> DeleteFile(int FileID)
+        {
+            //Get the file details
+            Models.File file = await _databaseService.GetFileAsync(FileID);
+            
+            //Delete the file from dir
+            string AbsPath = _configService.Value.GetAbsoluteFilePath(file.PathToData);
+            System.IO.File.Delete(AbsPath);
+
+            //Delete the database record
+            _databaseService.DeleteFileAsync(FileID);
+
+            return Ok("File was erased.");
+        }
     }
 }
