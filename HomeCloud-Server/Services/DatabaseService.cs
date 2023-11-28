@@ -46,9 +46,15 @@ namespace HomeCloud_Server.Services
             di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
         }
 
-        internal List<Models.File> GetAllFilesAsync()
+        public async Task<List<Models.File>> GetAllFilesAsync()
         {
             List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles;");
+            return retrievedFiles;
+        }
+
+        public async Task<List<Models.File>> GetAllFilesAsync(string FileName)
+        {
+            List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles WHERE FileName LIKE \"%{FileName}%\";");
             return retrievedFiles;
         }
 

@@ -96,7 +96,7 @@ namespace HomeCloud_Server.Controllers
         public async Task<IActionResult> ListAllFiles()
         {
             //Query database for all files
-            List<Models.File> fileList = _databaseService.GetAllFilesAsync();
+            List<Models.File> fileList = await _databaseService.GetAllFilesAsync();
             //Return list to the client
             return Ok(fileList);
         }
@@ -124,6 +124,19 @@ namespace HomeCloud_Server.Controllers
             //Create the FileResult object to use in the response, applying the correct file name and mime type
             FileResult fileResult = File(fileStream, file.MIMEType, file.FileName);
             return fileResult;
+        }
+
+        /// <summary>
+        /// Lists all files matching a search criteria
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("SearchFiles")]
+        public async Task<IActionResult> ListAllFiles(string FileName)
+        {
+            //Query database for all files
+            List<Models.File> fileList = await _databaseService.GetAllFilesAsync(FileName);
+            //Return list to the client
+            return Ok(fileList);
         }
 
         /// <summary>
