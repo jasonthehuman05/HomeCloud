@@ -89,6 +89,19 @@ namespace HomeCloud_Server.Controllers
         }
 
         /// <summary>
+        /// Lists all files
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("ListFiles")]
+        public async Task<IActionResult> ListAllFiles()
+        {
+            //Query database for all files
+            List<Models.File> fileList = _databaseService.GetAllFilesAsync();
+            //Return list to the client
+            return Ok(fileList);
+        }
+
+        /// <summary>
         /// Retrieves file information from the database and loads the file, allowing the client to download it
         /// </summary>
         /// <param name="FileID">The ID to utilise</param>
