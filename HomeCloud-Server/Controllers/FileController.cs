@@ -87,5 +87,26 @@ namespace HomeCloud_Server.Controllers
 
             return Ok(new {count = files.Count, size});
         }
+
+        [HttpGet("RetrieveFile")]
+        public IActionResult DownloadFile(int FileID)
+        {
+            Models.File file = new Models.File
+            {
+                FileID=FileID,
+                FileName="JasonFile.png",
+                MIMEType="image/png",
+                CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds,
+                PathToData= "C:\\xampp\\htdocs\\test.png"
+            };
+
+            if (!System.IO.File.Exists(file.PathToData))
+            {
+                return NotFound();
+            }
+            Stream fileStream = System.IO.File.OpenRead(file.PathToData);
+            FileResult fileResult = File(fileStream, file.MIMEType, file.FileName);
+            return fileResult;
+        }
     }
 }
