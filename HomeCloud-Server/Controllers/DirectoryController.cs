@@ -67,6 +67,13 @@ namespace HomeCloud_Server.Controllers
             return Ok(d);
         }
 
+        [HttpGet("GetFilesInDirectory")]
+        public async Task<IActionResult> GetFilesInDirectory(uint DirectoryID)
+        {
+            List<Models.File> f = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
+            return Ok(f);
+        }
+
         /// <summary>
         /// Renames a directory using the provided ID
         /// </summary>
@@ -86,13 +93,25 @@ namespace HomeCloud_Server.Controllers
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         [HttpDelete("DeleteDirectory")]
-        public async Task<IActionResult> DeleteDirectory()
+        public async Task<IActionResult> DeleteDirectory(uint DirectoryID)
         {
             //Check dir is empty
             //no files contained
+            List<Models.Directory> containedDirs = await _databaseService.GetSubdirectoriesAsync(DirectoryID);
             //no directories contained
-            //Delete it
-            throw new NotImplementedException();
+            List<Models.File> containedFiles = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
+
+            //Check empty
+            if(containedDirs.Count == 0 && containedFiles.Count == 0)
+            {
+                //Delete it
+                await _databaseService.DeleteDirectoryAsync(DirectoryID);
+                return Ok();
+            }
+            else
+            {
+                return Conflict("There were files or folders present in the directory. Please remove these and try again");
+            }
         }
     }
 }
