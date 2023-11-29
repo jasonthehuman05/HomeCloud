@@ -21,8 +21,14 @@ namespace HomeCloud_Server.Controllers
             _configService = configurationService;
         }
 
+        /// <summary>
+        /// Creates a directory, specifying a name and parent
+        /// </summary>
+        /// <param name="DirectoryName"></param>
+        /// <param name="ParentDirectoryID"></param>
+        /// <returns></returns>
         [HttpGet("CreateDirectory")]
-        public async Task<IActionResult> CreateDirectory(string DirectoryName, uint ParentDirectoryID)
+        public async Task<IActionResult> CreateDirectory(string DirectoryName, uint ParentDirectoryID = 0)
         {
             //Create folder object
             Models.Directory d = new Models.Directory
@@ -35,6 +41,53 @@ namespace HomeCloud_Server.Controllers
 
             //Return OK
             return Ok($"Folder {DirectoryName} was created.");
+        }
+
+        /// <summary>
+        /// Gets all directories
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        [HttpGet("GetAllDirectories")]
+        public async Task<IActionResult> GetAllDirectories()
+        {
+            List<Models.Directory> d = await _databaseService.GetDirectoriesAsync();
+            return Ok(d);
+        }
+
+        /// <summary>
+        /// Gets all directories inside the specified parent directory
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        [HttpGet("GetSubdirectories")]
+        public async Task<IActionResult> GetSubdirectories(uint ParentDirectoryID)
+        {
+            List<Models.Directory> d = await _databaseService.GetSubdirectoriesAsync(ParentDirectoryID);
+            return Ok(d);
+        }
+
+        /// <summary>
+        /// Renames a directory using the provided ID
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        [HttpGet("RenameDirectory")]
+        public async Task<IActionResult> RenameDirectory(uint DirectoryID, string NewName)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// Deletes the specified directory
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        [HttpDelete("DeleteDirectory")]
+        public async Task<IActionResult> DeleteDirectory()
+        {
+            throw new NotImplementedException();
         }
     }
 }

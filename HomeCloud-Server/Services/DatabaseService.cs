@@ -59,12 +59,30 @@ namespace HomeCloud_Server.Services
             return retrievedFiles;
         }
 
+        #endregion
+
+        #region Directories
+
         public async Task CreateNewDirectory(Models.Directory d)
         {
-            string command = $"INSERT INTO `homecloud`.`tbldirectories` (`ParentDirectoryID`, `DirName`) VALUES({ d.ParentDirectory}, '{ d.DirectoryName}');";
+            string command = $"INSERT INTO `homecloud`.`tbldirectories` (`ParentDirectoryID`, `DirName`) VALUES({d.ParentDirectory}, '{d.DirectoryName}');";
             Debug.WriteLine(command);
             di.NonQueryCommand(command);
             return;
+        }
+
+        public async Task<List<Models.Directory>> GetDirectoriesAsync()
+        {
+            List<Models.Directory> directories = di.GetData<Models.Directory>("SELECT * FROM tbldirectories;");
+
+            return directories;
+        }
+
+        public async Task<List<Models.Directory>> GetSubdirectoriesAsync(uint ParentDirectoryID)
+        {
+            List<Models.Directory> directories = di.GetData<Models.Directory>($"SELECT * FROM tbldirectories WHERE ParentDirectoryID={ParentDirectoryID};");
+
+            return directories;
         }
 
         #endregion
