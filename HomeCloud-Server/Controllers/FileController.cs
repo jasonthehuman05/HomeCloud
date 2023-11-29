@@ -20,36 +20,14 @@ namespace HomeCloud_Server.Controllers
             _databaseService = databaseService;
             _configService = configurationService;
         }
-
-        /// <summary>
-        /// Test function. Not to be used for final prod
-        /// </summary>
-        /// <param name="FileID"></param>
-        /// <returns></returns>
-        [HttpGet("GetFileTester")]
-        public async Task<Models.File> Get(int FileID)
-        {
-            Models.File testFile = new Models.File
-            {
-                FileID = FileID,
-                FileName = "TestFile.json",
-                MIMEType = "applicaiton/json",
-                CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds,
-                PathToData = "C:/users/jason/data/53408275.data"
-            };
-            await _databaseService.AddNewFileAsync(testFile);
-            //TODO: MAKE THIS ACTUALLY USEFUL
-            return testFile;
-        }
-
-
+        
         /// <summary>
         /// Takes an upload of files and stores them for use
         /// </summary>
         /// <param name="files">the IFormFile(s) to be stored</param>
         /// <returns></returns>
         [HttpPost("UploadFile"), DisableRequestSizeLimit]
-        public async Task<IActionResult> UploadFile(List<IFormFile> files)
+        public async Task<IActionResult> UploadFile(List<IFormFile> files, uint DirectoryID)
         {
             long size = files.Sum(f => f.Length); //Get total file size in bytes
             List<Models.File> FileList = new List<Models.File>();
@@ -73,7 +51,8 @@ namespace HomeCloud_Server.Controllers
                         FileName = Path.GetFileNameWithoutExtension(formFile.FileName),
                         MIMEType = formFile.ContentType,
                         CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds, //Current Time
-                        PathToData = newFilePath
+                        PathToData = newFilePath,
+                        ParentDir = DirectoryID
                     });
                 }
             }
@@ -98,6 +77,13 @@ namespace HomeCloud_Server.Controllers
             List<Models.File> fileList = await _databaseService.GetAllFilesAsync();
             //Return list to the client
             return Ok(fileList);
+        }
+
+        [HttpGet("MoveFileToDirectory")]
+        public async Task<IActionResult> MoveFileToDirectory(int FileID, uint DirectoryID)
+        {
+            await _databaseService.MoveFileAsync(FileID, DirectoryID);
+            return Ok();
         }
 
         /// <summary>

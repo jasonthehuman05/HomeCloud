@@ -1,8 +1,10 @@
 ﻿using HomeCloud_Server.Models;
+using Microsoft.Extensions.FileProviders.Composite;
 using Microsoft.Extensions.Options;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 using MySqlToolkit;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Reflection;
@@ -41,10 +43,6 @@ namespace HomeCloud_Server.Services
             return retrievedFiles[0];
         }
 
-        public async void DeleteFileAsync(int FileID)
-        {
-            di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
-        }
 
         public async Task<List<Models.File>> GetAllFilesAsync()
         {
@@ -56,6 +54,75 @@ namespace HomeCloud_Server.Services
         {
             List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles WHERE FileName LIKE \"%{FileName}%\";");
             return retrievedFiles;
+        }
+
+        public async Task<List<Models.File>> GetAllFilesInDirAsync(uint DirectoryID)
+        {
+            List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles WHERE ParentDirectoryID={DirectoryID};");
+            return retrievedFiles;
+        }
+
+        public async Task MoveFileAsync(int FileID, uint DirectoryID)
+        {
+            di.NonQueryCommand($"UPDATE tblfiles SET ParentDirectoryID={DirectoryID} WHERE FileID={FileID};");
+            return;
+        }
+
+        public async void DeleteFileAsync(int FileID)
+        {
+            di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
+        }
+        #endregion
+
+        #region Directories
+
+        public async Task CreateNewDirectory(Models.Directory d)
+        {
+            string command = $"INSERT INTO `homecloud`.`tbldirectories` (`ParentDirectoryID`, `DirName`) VALUES({d.ParentDirectory}, '{d.DirectoryName}');";
+            Debug.WriteLine(command);
+            di.NonQueryCommand(command);
+            return;
+        }
+
+        public async Task<List<Models.Directory>> GetDirectoriesAsync()
+        {
+            List<Models.Directory> directories = di.GetData<Models.Directory>("SELECT * FROM tbldirectories;");
+
+            return directories;
+        }
+
+        public async Task<List<Models.Directory>> GetSubdirectoriesAsync(uint ParentDirectoryID)
+        {
+            List<Models.Directory> directories = di.GetData<Models.Directory>($"SELECT * FROM tbldirectories WHERE ParentDirectoryID={ParentDirectoryID};");
+
+            return directories;
+        }
+
+        public async Task RenameDirectoryAsync(uint DirectoryID, string NewName)
+        {
+            di.NonQueryCommand($"UPDATE tbldirectories SET DirName='{NewName}' WHERE DirectoryID={DirectoryID};");
+            return;
+        }
+
+        public async Task DeleteDirectoryAsync(uint DirectoryID)
+        {
+            di.NonQueryCommand($"DELETE FROM tbldirectories WHERE DirectoryID={DirectoryID};");
+        }
+
+        public async Task<Models.DirectoryContents> GetDirectoryContents(uint DirectoryID)
+        {
+            //Get Directories
+            List<Models.Directory> directories = await GetSubdirectoriesAsync(DirectoryID);
+            //Get Files
+            List<Models.File> files = await GetAllFilesInDirAsync(DirectoryID);
+            //Combine
+            Models.DirectoryContents dc = new DirectoryContents
+            {
+                Directories = directories,
+                Files = files
+            };
+            //Return
+            return dc;
         }
 
         #endregion
