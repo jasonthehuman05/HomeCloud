@@ -61,6 +61,12 @@ namespace HomeCloud_Server.Services
             return retrievedFiles;
         }
 
+        public async Task MoveFileAsync(int FileID, uint DirectoryID)
+        {
+            di.NonQueryCommand($"UPDATE tblfiles SET ParentDirectoryID={DirectoryID} WHERE FileID={FileID};");
+            return;
+        }
+
         public async void DeleteFileAsync(int FileID)
         {
             di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
