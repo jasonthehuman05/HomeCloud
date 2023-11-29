@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 using MySqlToolkit;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Reflection;
@@ -56,6 +57,14 @@ namespace HomeCloud_Server.Services
         {
             List<Models.File> retrievedFiles = di.GetData<Models.File>($"SELECT * FROM tblfiles WHERE FileName LIKE \"%{FileName}%\";");
             return retrievedFiles;
+        }
+
+        public async Task CreateNewDirectory(Models.Directory d)
+        {
+            string command = $"INSERT INTO `homecloud`.`tbldirectories` (`ParentDirectoryID`, `DirName`) VALUES({ d.ParentDirectory}, '{ d.DirectoryName}');";
+            Debug.WriteLine(command);
+            di.NonQueryCommand(command);
+            return;
         }
 
         #endregion

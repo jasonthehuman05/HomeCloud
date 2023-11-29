@@ -17,5 +17,8 @@ namespace HomeCloud_Server.Models
 
         [MySqlColumn("PathToData", false)]
         public string PathToData { get; set; }
+
+        [MySqlColumn("ParentDirectory", false)]
+        public uint ParentDir { get; set; }
     }
 }
