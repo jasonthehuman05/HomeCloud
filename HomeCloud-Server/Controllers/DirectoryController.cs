@@ -75,7 +75,8 @@ namespace HomeCloud_Server.Controllers
         [HttpGet("RenameDirectory")]
         public async Task<IActionResult> RenameDirectory(uint DirectoryID, string NewName)
         {
-            throw new NotImplementedException();
+            await _databaseService.RenameDirectoryAsync(DirectoryID, NewName);
+            return Ok();
         }
 
 
@@ -87,6 +88,10 @@ namespace HomeCloud_Server.Controllers
         [HttpDelete("DeleteDirectory")]
         public async Task<IActionResult> DeleteDirectory()
         {
+            //Check dir is empty
+            //no files contained
+            //no directories contained
+            //Delete it
             throw new NotImplementedException();
         }
     }

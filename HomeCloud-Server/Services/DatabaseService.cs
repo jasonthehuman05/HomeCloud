@@ -42,10 +42,6 @@ namespace HomeCloud_Server.Services
             return retrievedFiles[0];
         }
 
-        public async void DeleteFileAsync(int FileID)
-        {
-            di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
-        }
 
         public async Task<List<Models.File>> GetAllFilesAsync()
         {
@@ -59,6 +55,10 @@ namespace HomeCloud_Server.Services
             return retrievedFiles;
         }
 
+        public async void DeleteFileAsync(int FileID)
+        {
+            di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
+        }
         #endregion
 
         #region Directories
@@ -83,6 +83,17 @@ namespace HomeCloud_Server.Services
             List<Models.Directory> directories = di.GetData<Models.Directory>($"SELECT * FROM tbldirectories WHERE ParentDirectoryID={ParentDirectoryID};");
 
             return directories;
+        }
+
+        public async Task RenameDirectoryAsync(uint DirectoryID, string NewName)
+        {
+            di.NonQueryCommand($"UPDATE tbldirectories SET DirName='{NewName}' WHERE DirectoryID={DirectoryID};");
+            return;
+        }
+
+        public async void DeleteDirectoryAsync(int DirectoryID)
+        {
+            di.NonQueryCommand($"DELETE FROM tbldirectories WHERE DirectoryID={DirectoryID};");
         }
 
         #endregion
