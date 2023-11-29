@@ -12,5 +12,8 @@ namespace HomeCloud_Server.Models
 
         [MySqlColumn("DirName", false)]
         public string DirectoryName { get; set; }
+
+        [MySqlColumn("CreatedOn", false)]
+        public ulong CreatedOn { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HomeCloud_Server.Models;
+using Microsoft.Extensions.FileProviders.Composite;
 using Microsoft.Extensions.Options;
 using MySql.Data;
 using MySql.Data.MySqlClient;
@@ -106,6 +107,22 @@ namespace HomeCloud_Server.Services
         public async Task DeleteDirectoryAsync(uint DirectoryID)
         {
             di.NonQueryCommand($"DELETE FROM tbldirectories WHERE DirectoryID={DirectoryID};");
+        }
+
+        public async Task<Models.DirectoryContents> GetDirectoryContents(uint DirectoryID)
+        {
+            //Get Directories
+            List<Models.Directory> directories = await GetSubdirectoriesAsync(DirectoryID);
+            //Get Files
+            List<Models.File> files = await GetAllFilesInDirAsync(DirectoryID);
+            //Combine
+            Models.DirectoryContents dc = new DirectoryContents
+            {
+                Directories = directories,
+                Files = files
+            };
+            //Return
+            return dc;
         }
 
         #endregion

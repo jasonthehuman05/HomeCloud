@@ -34,7 +34,8 @@ namespace HomeCloud_Server.Controllers
             Models.Directory d = new Models.Directory
             {
                 ParentDirectory = ParentDirectoryID,
-                DirectoryName = DirectoryName
+                DirectoryName = DirectoryName,
+                CreatedOn = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds //Current Time
             };
             //Add folder to the database
             await _databaseService.CreateNewDirectory(d);
@@ -72,6 +73,13 @@ namespace HomeCloud_Server.Controllers
         {
             List<Models.File> f = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
             return Ok(f);
+        }
+
+        [HttpGet("GetContents")]
+        public async Task<IActionResult> GetContents(uint DirectoryID)
+        {
+            Models.DirectoryContents dc = await _databaseService.GetDirectoryContents(DirectoryID);
+            return Ok(dc);
         }
 
         /// <summary>
