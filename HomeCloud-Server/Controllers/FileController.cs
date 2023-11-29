@@ -64,14 +64,13 @@ namespace HomeCloud_Server.Controllers
                         newFilePath = Utils.GenerateRandomString(16); //Generate a 16 character random file name
                         if (!System.IO.File.Exists(newFilePath)){ break; }
                     }
-                    using (var stream = new FileStream(_configService.Value.FileHostingPath + newFilePath, FileMode.Create)) //Create filestream in temp dir, creating a new file
+                    using (var stream = new FileStream(_configService.Value.FileHostingPath + newFilePath, FileMode.Create)) //Create filestream in dir, creating a new file
                     {
                         await formFile.CopyToAsync(stream); //copy all data from the file to the new temp file stream
                     }
-
                     FileList.Add(new Models.File()
                     {
-                        FileName = formFile.Name,
+                        FileName = Path.GetFileNameWithoutExtension(formFile.FileName),
                         MIMEType = formFile.ContentType,
                         CreatedOnTimestamp = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds, //Current Time
                         PathToData = newFilePath
