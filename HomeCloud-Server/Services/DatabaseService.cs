@@ -1,4 +1,5 @@
 ﻿using HomeCloud_Server.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders.Composite;
 using Microsoft.Extensions.Options;
 using MySql.Data;
@@ -123,6 +124,15 @@ namespace HomeCloud_Server.Services
             };
             //Return
             return dc;
+        }
+
+        #endregion
+
+        #region Users
+
+        public async Task CreateNewUser(Models.User user)
+        {
+            di.InsertData<Models.User>("tblusers", user);
         }
 
         #endregion
