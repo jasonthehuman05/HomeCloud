@@ -135,6 +135,14 @@ namespace HomeCloud_Server.Services
             di.InsertData<Models.User>("tblusers", user);
         }
 
+        internal List<User> CheckAccountUsernamePassword(string emailAddress, string password)
+        {
+            //Build Query
+            string query = $"SELECT * FROM `tblusers` WHERE `EmailAddress`=\"{emailAddress}\" AND `Password`=\"{password}\";";
+            List<User> accounts = di.GetData<Models.User>(query);
+
+            return accounts;
+        }
         #endregion
     }
 }

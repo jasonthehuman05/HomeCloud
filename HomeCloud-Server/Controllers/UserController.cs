@@ -55,5 +55,25 @@ namespace HomeCloud_Server.Controllers
 
             return Ok();
         }
+
+        [HttpGet("LoginUser")]
+        public async Task<IActionResult> LoginUser(string EmailAddress, string Password)
+        {
+            //Hash password so that it is usable
+            Password = GenerateHashedValue(Password);
+
+            List<User> users = _databaseService.CheckAccountUsernamePassword(EmailAddress, Password);
+            System.Diagnostics.Debug.WriteLine(users.Count);
+
+            if(users.Count == 1)
+            {
+                //Exactly one account found, valid credentials.
+                return Ok();
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
     }
 }
