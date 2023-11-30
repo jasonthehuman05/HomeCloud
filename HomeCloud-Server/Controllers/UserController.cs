@@ -23,6 +23,14 @@ namespace HomeCloud_Server.Controllers
             _configService = configurationService;
         }
 
+        private string GenerateHashedValue(string value)
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes(value);
+            byte[] hashed = SHA256.HashData(buffer);
+            string hash = Encoding.UTF8.GetString(hashed);
+            return hash;
+        }
+
         /// <summary>
         /// Creates a directory, specifying a name and parent
         /// </summary>
@@ -30,16 +38,15 @@ namespace HomeCloud_Server.Controllers
         /// <param name="ParentDirectoryID"></param>
         /// <returns></returns>
         [HttpGet("CreateUser")]
-        public async Task<IActionResult> CreateDirectory(string EmailAddress, string Password)
+        public async Task<IActionResult> CreateDirectory(string UserName, string EmailAddress, string Password)
         {
             //Hash password before it ever gets used
-            byte[] buffer = Encoding.UTF8.GetBytes(Password);
-            byte[] hashed = SHA256.HashData(buffer);
-            Password = Encoding.UTF8.GetString(hashed);
+            Password = GenerateHashedValue(Password);
             //Password is now hashed, we can continue
 
             Models.User user = new User
             {
+                UserName = UserName,
                 EmailAddress = EmailAddress,
                 Password = Password
             };

@@ -7,6 +7,9 @@ namespace HomeCloud_Server.Models
         [MySqlColumn("UserID", true)]
         public int UserID { get; set; }
 
+        [MySqlColumn("UserName", false)]
+        public string UserName { get; set;}
+
         [MySqlColumn("EmailAddress", false)]
         public string EmailAddress { get; set;}
 
