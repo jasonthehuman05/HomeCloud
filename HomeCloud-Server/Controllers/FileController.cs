@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using HomeCloud_Server.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeCloud_Server.Controllers
 {
@@ -70,6 +71,7 @@ namespace HomeCloud_Server.Controllers
         /// Lists all files
         /// </summary>
         /// <returns></returns>
+        [Authorize]
         [HttpGet("ListFiles")]
         public async Task<IActionResult> ListAllFiles()
         {

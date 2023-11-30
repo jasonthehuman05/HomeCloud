@@ -5,6 +5,7 @@ using HomeCloud_Server.Services;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeCloud_Server.Controllers
 {
@@ -56,6 +57,7 @@ namespace HomeCloud_Server.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("LoginUser")]
         public async Task<IActionResult> LoginUser(string EmailAddress, string Password)
         {
