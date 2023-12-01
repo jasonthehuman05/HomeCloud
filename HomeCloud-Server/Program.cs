@@ -1,6 +1,7 @@
 using HomeCloud_Server.Auth;
 using HomeCloud_Server.Models;
 using HomeCloud_Server.Services;
+using Microsoft.OpenApi.Models;
 
 namespace HomeCloud_Server
 {
@@ -23,7 +24,31 @@ namespace HomeCloud_Server
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.AddSecurityDefinition("ApiKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Description = "api auth",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    Name = "ApiKey",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Scheme = "ApiKeyScheme"
+                });
+                var scheme = new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "ApiKey"
+                    },
+                    In=ParameterLocation.Header
+                };
+                var requirement = new OpenApiSecurityRequirement
+                {
+                    {scheme, new List<String>() }
+                };
+                c.AddSecurityRequirement(requirement);
+            });
 
             builder.Services.AddScoped<ApiKeyAuthFilter>();
 
