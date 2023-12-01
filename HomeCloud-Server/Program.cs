@@ -19,13 +19,7 @@ namespace HomeCloud_Server
 
             builder.Services.Configure<ConfigurationService>(builder.Configuration.GetSection("ConfigurationSettings"));
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AuthPolicy", policy =>
-                {
-                    policy.Requirements.Add(new CustomRequirement());
-                });
-            });
+            //builder.Services.AddAuthentication("AuthScheme");
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -42,6 +36,9 @@ namespace HomeCloud_Server
 
             app.UseHttpsRedirection();
 
+
+
+            //app.UseAuthentication();
             app.UseAuthorization();
 
 

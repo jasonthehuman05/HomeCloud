@@ -57,7 +57,6 @@ namespace HomeCloud_Server.Controllers
             return Ok();
         }
 
-        [AllowAnonymous]
         [HttpGet("LoginUser")]
         public async Task<IActionResult> LoginUser(string EmailAddress, string Password)
         {

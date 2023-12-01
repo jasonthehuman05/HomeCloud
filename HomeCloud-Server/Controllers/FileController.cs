@@ -71,7 +71,6 @@ namespace HomeCloud_Server.Controllers
         /// Lists all files
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("ListFiles")]
         public async Task<IActionResult> ListAllFiles()
         {
