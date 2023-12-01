@@ -12,7 +12,7 @@ namespace HomeCloud_Server
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(x => x.Filters.Add<ApiKeyAuthFilter>());
 
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
             builder.Services.AddSingleton<DatabaseService>();
@@ -38,7 +38,7 @@ namespace HomeCloud_Server
 
 
 
-            app.UseMiddleware<ApiKeyAuthMiddleware>();
+            //app.UseMiddleware<ApiKeyAuthMiddleware>();
             app.UseAuthorization();
 
 
