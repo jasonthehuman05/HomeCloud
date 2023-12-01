@@ -38,7 +38,7 @@ namespace HomeCloud_Server
 
 
 
-            //app.UseAuthentication();
+            app.UseMiddleware<ApiKeyAuthMiddleware>();
             app.UseAuthorization();
 
 
