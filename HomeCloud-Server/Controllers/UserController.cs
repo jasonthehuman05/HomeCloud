@@ -6,9 +6,11 @@ using Microsoft.Extensions.Options;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using HomeCloud_Server.Auth;
 
 namespace HomeCloud_Server.Controllers
 {
+    [ApiKeyAuthFilter]
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase
@@ -57,24 +59,24 @@ namespace HomeCloud_Server.Controllers
             return Ok();
         }
 
-        [HttpGet("LoginUser")]
-        public async Task<IActionResult> LoginUser(string EmailAddress, string Password)
-        {
-            //Hash password so that it is usable
-            Password = GenerateHashedValue(Password);
+        //[HttpGet("LoginUser")]
+        //public async Task<IActionResult> LoginUser(string EmailAddress, string Password)
+        //{
+        //    //Hash password so that it is usable
+        //    Password = GenerateHashedValue(Password);
 
-            List<User> users = _databaseService.CheckAccountUsernamePassword(EmailAddress, Password);
-            System.Diagnostics.Debug.WriteLine(users.Count);
+        //    List<User> users = _databaseService.CheckAccountUsernamePassword(EmailAddress, Password);
+        //    System.Diagnostics.Debug.WriteLine(users.Count);
 
-            if(users.Count == 1)
-            {
-                //Exactly one account found, valid credentials.
-                return Ok();
-            }
-            else
-            {
-                return Unauthorized();
-            }
-        }
+        //    if(users.Count == 1)
+        //    {
+        //        //Exactly one account found, valid credentials.
+        //        return Ok();
+        //    }
+        //    else
+        //    {
+        //        return Unauthorized();
+        //    }
+        //}
     }
 }

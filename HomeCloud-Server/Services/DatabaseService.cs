@@ -8,6 +8,7 @@ using MySqlToolkit;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 
 namespace HomeCloud_Server.Services
@@ -143,6 +144,34 @@ namespace HomeCloud_Server.Services
 
             return accounts;
         }
+
+        #endregion
+
+        #region auth
+
+        internal void CreateToken(AuthToken token)
+        {
+            di.InsertData<AuthToken>("tblauthtokens", token);
+        }
+
+        internal List<AuthToken> GetTokens()
+        {
+            string query = "SELECT * FROM tblauthtokens;";
+            List<AuthToken> tokens = di.GetData<AuthToken>(query);
+            return tokens;
+        }
+
+        internal void UpdateTokenExpiry(AuthToken token)
+        {
+            ulong time = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds + 604800; //7 day token duration
+            di.NonQueryCommand($"UPDATE tblauthtokens SET ExpiryTimestamp='{time}' WHERE Token=\"{token.Token}\";");
+        }
+
+        internal void DeleteToken(string token)
+        {
+            di.NonQueryCommand($"DELETE FROM tblauthtokens WHERE Token=\"{token}\";");
+        }
+
         #endregion
     }
 }
