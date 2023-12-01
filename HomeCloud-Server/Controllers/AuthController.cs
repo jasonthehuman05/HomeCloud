@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace HomeCloud_Server.Controllers
 {
     [ApiController]
+    //DO NOT REQUIRE AUTH ISTG
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
