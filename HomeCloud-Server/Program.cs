@@ -12,7 +12,7 @@ namespace HomeCloud_Server
 
             // Add services to the container.
 
-            builder.Services.AddControllers(x => x.Filters.Add<ApiKeyAuthFilter>());
+            builder.Services.AddControllers(/*x => x.Filters.Add<ApiKeyAuthFilter>()*/);
 
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
             builder.Services.AddSingleton<DatabaseService>();
@@ -24,6 +24,8 @@ namespace HomeCloud_Server
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<ApiKeyAuthFilter>();
 
             var app = builder.Build();
 

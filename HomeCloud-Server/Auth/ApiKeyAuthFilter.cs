@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace HomeCloud_Server.Auth
 {
-    public class ApiKeyAuthFilter :IAuthorizationFilter
+    public class ApiKeyAuthFilter : Attribute, IAuthorizationFilter
     {
         public ApiKeyAuthFilter() { }
 
