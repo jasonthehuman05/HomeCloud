@@ -1,4 +1,5 @@
 ﻿using HomeCloud_Server.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders.Composite;
 using Microsoft.Extensions.Options;
 using MySql.Data;
@@ -7,6 +8,7 @@ using MySqlToolkit;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 
 namespace HomeCloud_Server.Services
@@ -123,6 +125,53 @@ namespace HomeCloud_Server.Services
             };
             //Return
             return dc;
+        }
+
+        #endregion
+
+        #region Users
+
+        public async Task CreateNewUser(Models.User user)
+        {
+            di.InsertData<Models.User>("tblusers", user);
+        }
+
+        internal List<User> CheckAccountUsernamePassword(string emailAddress, string password)
+        {
+            //Build Query
+            string query = $"SELECT * FROM `tblusers` WHERE `EmailAddress`=\"{emailAddress}\" AND `Password`=\"{password}\";";
+            List<User> accounts = di.GetData<Models.User>(query);
+
+            return accounts;
+        }
+
+        #endregion
+
+        #region auth
+
+        internal void CreateToken(AuthToken token)
+        {
+            di.InsertData<AuthToken>("tblauthtokens", token);
+        }
+
+        internal List<AuthToken> GetTokens()
+        {
+            string query = "SELECT * FROM tblauthtokens;";
+            List<AuthToken> tokens = di.GetData<AuthToken>(query);
+            return tokens;
+        }
+
+        internal AuthToken UpdateTokenExpiry(AuthToken token)
+        {
+            ulong time = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds + 604800; //7 day token duration
+            di.NonQueryCommand($"UPDATE tblauthtokens SET ExpiryTimestamp='{time}' WHERE Token=\"{token.Token}\";");
+            token.ExpiryTimestamp = time;
+            return token;
+        }
+
+        internal void DeleteToken(string token)
+        {
+            di.NonQueryCommand($"DELETE FROM tblauthtokens WHERE Token=\"{token}\";");
         }
 
         #endregion

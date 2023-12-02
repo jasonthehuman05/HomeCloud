@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using HomeCloud_Server.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
+using HomeCloud_Server.Auth;
 
 namespace HomeCloud_Server.Controllers
 {
     [ApiController]
+    [ApiKeyAuthFilter]
     [Route("[controller]")]
     public class FileController : ControllerBase
     {
