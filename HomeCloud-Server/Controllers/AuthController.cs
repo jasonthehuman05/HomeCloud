@@ -56,11 +56,41 @@ namespace HomeCloud_Server.Controllers
                 };
                 //Add to db
                 _databaseService.CreateToken(token);
-                return Ok(new {token=token.Token, expiry=token.ExpiryTimestamp});
+                return Ok(new { token = token.Token, expiry = token.ExpiryTimestamp });
             }
             else
             {
                 return Unauthorized();
+            }
+        }
+
+        /// <summary>
+        /// Check the provided token to see if it is valid and in date
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpGet("VerifyToken")]
+        public async Task<IActionResult> VerifyToken(string token)
+        {
+            //Get all tokens
+            List<AuthToken> tokens = _databaseService.GetTokens();
+
+            //Try and get the token from the list
+            AuthToken tkn = tokens.FirstOrDefault(_t => _t.Token == token, null);
+
+            if (tkn == null) //No matching tokens
+            {
+                return BadRequest("No token was provided");
+            }
+            else if(tkn.ExpiryTimestamp > DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
+            {
+                return BadRequest("Token has expired");
+            }
+            else
+            {
+                //We found the token. Allow the application to continue, leave the token expiry to update in the background
+                AuthToken t = _databaseService.UpdateTokenExpiry(tkn);
+                return Ok(token);
             }
         }
     }

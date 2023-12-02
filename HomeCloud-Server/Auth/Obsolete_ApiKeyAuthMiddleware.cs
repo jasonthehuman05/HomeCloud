@@ -1,10 +1,10 @@
 ﻿namespace HomeCloud_Server.Auth
 {
-    public class ApiKeyAuthMiddleware
+    public class Obsolete_ApiKeyAuthMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public ApiKeyAuthMiddleware(RequestDelegate next)
+        public Obsolete_ApiKeyAuthMiddleware(RequestDelegate next)
         {
             _next = next;
         }

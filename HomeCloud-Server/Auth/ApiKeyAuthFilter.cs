@@ -33,6 +33,10 @@ namespace HomeCloud_Server.Auth
             {
                 context.Result = new UnauthorizedObjectResult("API Key Invalid");
             }
+            else if (token.ExpiryTimestamp > DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
+            {
+                context.Result = new UnauthorizedObjectResult("Token has expired");
+            }
             else
             {
                 //We found the token. Allow the application to continue, leave the token expiry to update in the background

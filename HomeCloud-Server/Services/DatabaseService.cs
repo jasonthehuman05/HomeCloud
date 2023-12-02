@@ -161,10 +161,12 @@ namespace HomeCloud_Server.Services
             return tokens;
         }
 
-        internal void UpdateTokenExpiry(AuthToken token)
+        internal AuthToken UpdateTokenExpiry(AuthToken token)
         {
             ulong time = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds + 604800; //7 day token duration
             di.NonQueryCommand($"UPDATE tblauthtokens SET ExpiryTimestamp='{time}' WHERE Token=\"{token.Token}\";");
+            token.ExpiryTimestamp = time;
+            return token;
         }
 
         internal void DeleteToken(string token)
