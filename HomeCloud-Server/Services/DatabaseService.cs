@@ -80,9 +80,7 @@ namespace HomeCloud_Server.Services
 
         public async Task CreateNewDirectory(Models.Directory d)
         {
-            string command = $"INSERT INTO `homecloud`.`tbldirectories` (`ParentDirectoryID`, `DirName`) VALUES({d.ParentDirectory}, '{d.DirectoryName}');";
-            Debug.WriteLine(command);
-            di.NonQueryCommand(command);
+            di.InsertData<Models.Directory>("tbldirectories", d);
             return;
         }
 
