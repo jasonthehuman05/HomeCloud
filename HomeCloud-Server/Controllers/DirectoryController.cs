@@ -32,18 +32,27 @@ namespace HomeCloud_Server.Controllers
         [HttpGet("CreateDirectory")]
         public async Task<IActionResult> CreateDirectory(string DirectoryName, uint ParentDirectoryID = 0)
         {
-            //Create folder object
-            Models.Directory d = new Models.Directory
+            string token = Request.Headers["ApiKey"];
+            User user = _databaseService.GetUserFromToken(token);
+            if (PermissionChecker.AllowedToCreate(ParentDirectoryID, user.UserID, _databaseService))
             {
-                ParentDirectory = ParentDirectoryID,
-                DirectoryName = DirectoryName,
-                CreatedOn = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds //Current Time
-            };
-            //Add folder to the database
-            await _databaseService.CreateNewDirectory(d);
+                //Create folder object
+                Models.Directory d = new Models.Directory
+                {
+                    ParentDirectory = ParentDirectoryID,
+                    DirectoryName = DirectoryName,
+                    CreatedOn = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds //Current Time
+                };
+                //Add folder to the database
+                await _databaseService.CreateNewDirectory(d);
 
-            //Return OK
-            return Ok($"Folder {DirectoryName} was created.");
+                //Return OK
+                return Ok($"Folder {DirectoryName} was created.");
+            }
+            else
+            {
+                return Forbid("You do not have the appropriate permissions to create a new directory here");
+            }
         }
 
         /// <summary>

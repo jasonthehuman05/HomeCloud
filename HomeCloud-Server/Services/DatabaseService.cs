@@ -93,6 +93,13 @@ namespace HomeCloud_Server.Services
             return directories;
         }
 
+        public Models.Directory GetDirectory(ulong dirID)
+        {
+            Models.Directory directory = di.GetData<Models.Directory>($"SELECT * FROM tbldirectories WHERE DirectoryID={dirID};")[0];
+
+            return directory;
+        }
+
         public async Task<List<Models.Directory>> GetSubdirectoriesAsync(uint ParentDirectoryID)
         {
             List<Models.Directory> directories = di.GetData<Models.Directory>($"SELECT * FROM tbldirectories WHERE ParentDirectoryID={ParentDirectoryID};");
@@ -145,6 +152,15 @@ namespace HomeCloud_Server.Services
             return accounts;
         }
 
+        internal User GetUser(ulong UserID)
+        {
+            //Build Query
+            string query = $"SELECT * FROM `tblusers` WHERE `UserID`={UserID};";
+            User user = di.GetData<Models.User>(query)[0];
+
+            return user;
+        }
+
         #endregion
 
         #region auth
@@ -161,6 +177,15 @@ namespace HomeCloud_Server.Services
             return tokens;
         }
 
+        internal User GetUserFromToken(string token)
+        {
+            string query = $"SELECT * FROM tblauthtokens WHERE Token=\"{token}\";";
+            AuthToken TokenObject = di.GetData<AuthToken>(query)[0];
+            string getUserQuery = $"SELECT * FROM tblusers WHERE UserID=\"{TokenObject.UserID}\";";
+            User user = di.GetData<User>(getUserQuery)[0];
+            return user;
+        }
+
         internal AuthToken UpdateTokenExpiry(AuthToken token)
         {
             ulong time = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds + 604800; //7 day token duration
@@ -172,6 +197,16 @@ namespace HomeCloud_Server.Services
         internal void DeleteToken(string token)
         {
             di.NonQueryCommand($"DELETE FROM tblauthtokens WHERE Token=\"{token}\";");
+        }
+
+        #endregion
+
+        #region Permissions
+
+        public List<Models.DirectoryAccessRights> GetUserDirectoryPermissions(ulong UserID, int DirectoryID)
+        {
+            List<Models.DirectoryAccessRights> rights = di.GetData<Models.DirectoryAccessRights>($"SELECT * FROM tbldirectories WHERE DirectoryID={DirectoryID} AND UserID={UserID};");
+            return rights;
         }
 
         #endregion
