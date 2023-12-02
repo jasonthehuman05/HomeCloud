@@ -51,7 +51,7 @@ namespace HomeCloud_Server.Controllers
             }
             else
             {
-                return Forbid("You do not have the appropriate permissions to create a new directory here");
+                return Unauthorized("You do not have the appropriate permissions to create a new directory here");
             }
         }
 

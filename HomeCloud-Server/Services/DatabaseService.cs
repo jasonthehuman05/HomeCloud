@@ -205,7 +205,7 @@ namespace HomeCloud_Server.Services
 
         public List<Models.DirectoryAccessRights> GetUserDirectoryPermissions(ulong UserID, int DirectoryID)
         {
-            List<Models.DirectoryAccessRights> rights = di.GetData<Models.DirectoryAccessRights>($"SELECT * FROM tbldirectories WHERE DirectoryID={DirectoryID} AND UserID={UserID};");
+            List<Models.DirectoryAccessRights> rights = di.GetData<Models.DirectoryAccessRights>($"SELECT * FROM tbldirectoryaccessrights WHERE DirectoryID={DirectoryID} AND UserID={UserID};");
             return rights;
         }
 

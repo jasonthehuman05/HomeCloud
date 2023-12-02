@@ -33,7 +33,7 @@ namespace HomeCloud_Server.Auth
             {
                 context.Result = new UnauthorizedObjectResult("API Key Invalid");
             }
-            else if (token.ExpiryTimestamp > DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
+            else if (token.ExpiryTimestamp < DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
             {
                 context.Result = new UnauthorizedObjectResult("Token has expired");
             }

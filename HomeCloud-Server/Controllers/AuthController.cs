@@ -82,7 +82,7 @@ namespace HomeCloud_Server.Controllers
             {
                 return BadRequest("No token was provided");
             }
-            else if(tkn.ExpiryTimestamp > DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
+            else if(tkn.ExpiryTimestamp < DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds)
             {
                 return BadRequest("Token has expired");
             }
