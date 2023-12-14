@@ -167,5 +167,29 @@ namespace HomeCloud_Server.Controllers
             }
             else { return Unauthorized(); }
         }
+
+
+        [HttpGet("ChangeUserDirectoryPermissions")]
+        public async Task<IActionResult> ChangeUserDirectoryPermissions(int UserID, uint DirectoryID, bool CC, bool CV, bool CE, bool CD)
+        {
+            User user = GetUser();
+            if(PermissionChecker.AllowedToEdit(DirectoryID, user.UserID, _databaseService))
+            {
+                //Check if there are any existing permissions
+                List<Models.DirectoryAccessRights> perms = _databaseService.GetUserDirectoryPermissions(DirectoryID, UserID);
+                if(perms.Count != 0)
+                {
+                    _databaseService.UpdateExistingDirectoryPermission(perms[0].DirectoryAccessRightsID, CC, CV, CE, CD);
+                    return Ok();
+                }
+                //Create permissions if there were none
+                else
+                {
+                    _databaseService.CreateDirectoryPermission(DirectoryID, UserID, CC, CV, CE, CD);
+                    return Ok();
+                }
+            }
+            else{   return Unauthorized();  }
+        }
     }
 }

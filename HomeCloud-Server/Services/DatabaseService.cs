@@ -207,6 +207,26 @@ namespace HomeCloud_Server.Services
             return rights;
         }
 
+        internal void UpdateExistingDirectoryPermission(ulong directoryAccessRightsID, bool cC, bool cV, bool cE, bool cD)
+        {
+            di.NonQueryCommand($"UPDATE tbldirectoryaccessrights SET CanCreate={cC}, CanView={cV}, CanEdit={cE}, CanDelete={cD} WHERE DirectoryAccessRightsID={directoryAccessRightsID};");
+            return;
+        }
+
+        internal void CreateDirectoryPermission(ulong directoryID, int userID, bool cC, bool cV, bool cE, bool cD)
+        {
+            DirectoryAccessRights dir = new DirectoryAccessRights()
+            {
+                DirectoryID = directoryID,
+                UserID = (ulong)userID,
+                CanCreate = cC,
+                CanView = cV,
+                CanEdit = cE,
+                CanDelete = cV
+            };
+            di.InsertData<DirectoryAccessRights>("tbldirectoryaccessrights", dir);
+        }
+
         #endregion
     }
 }
