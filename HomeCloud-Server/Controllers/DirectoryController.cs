@@ -23,6 +23,13 @@ namespace HomeCloud_Server.Controllers
             _configService = configurationService;
         }
 
+        private User GetUser()
+        {
+            string token = Request.Headers["ApiKey"];
+            User user = _databaseService.GetUserFromToken(token);
+            return user;
+        }
+
         /// <summary>
         /// Creates a directory, specifying a name and parent
         /// </summary>
@@ -32,18 +39,27 @@ namespace HomeCloud_Server.Controllers
         [HttpGet("CreateDirectory")]
         public async Task<IActionResult> CreateDirectory(string DirectoryName, uint ParentDirectoryID = 0)
         {
-            //Create folder object
-            Models.Directory d = new Models.Directory
+            User user = GetUser();
+            if (PermissionChecker.AllowedToCreate(ParentDirectoryID, user.UserID, _databaseService))
             {
-                ParentDirectory = ParentDirectoryID,
-                DirectoryName = DirectoryName,
-                CreatedOn = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds //Current Time
-            };
-            //Add folder to the database
-            await _databaseService.CreateNewDirectory(d);
+                //Create folder object
+                Models.Directory d = new Models.Directory
+                {
+                    ParentDirectory = ParentDirectoryID,
+                    DirectoryName = DirectoryName,
+                    CreatedOn = (ulong)DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds, //Current Time
+                    OwnerID = user.UserID
+                };
+                //Add folder to the database
+                await _databaseService.CreateNewDirectory(d);
 
-            //Return OK
-            return Ok($"Folder {DirectoryName} was created.");
+                //Return OK
+                return Ok($"Folder {DirectoryName} was created.");
+            }
+            else
+            {
+                return Unauthorized("You do not have the appropriate permissions to create a new directory here");
+            }
         }
 
         /// <summary>
@@ -55,7 +71,7 @@ namespace HomeCloud_Server.Controllers
         public async Task<IActionResult> GetAllDirectories()
         {
             List<Models.Directory> d = await _databaseService.GetDirectoriesAsync();
-            return Ok(d);
+            return Ok(d); 
         }
 
         /// <summary>
@@ -66,22 +82,40 @@ namespace HomeCloud_Server.Controllers
         [HttpGet("GetSubdirectories")]
         public async Task<IActionResult> GetSubdirectories(uint ParentDirectoryID)
         {
-            List<Models.Directory> d = await _databaseService.GetSubdirectoriesAsync(ParentDirectoryID);
-            return Ok(d);
+            User user = GetUser();
+            if (PermissionChecker.AllowedToView(user, ParentDirectoryID, _databaseService))
+            {
+                List<Models.Directory> d = await _databaseService.GetSubdirectoriesAsync(ParentDirectoryID);
+                return Ok(d); 
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpGet("GetFilesInDirectory")]
         public async Task<IActionResult> GetFilesInDirectory(uint DirectoryID)
         {
-            List<Models.File> f = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
-            return Ok(f);
+            User user = GetUser();
+            if (PermissionChecker.AllowedToView(user, DirectoryID, _databaseService))
+            {
+                List<Models.File> f = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
+                return Ok(f); 
+            }
+            else { return Unauthorized(); }
         }
 
         [HttpGet("GetContents")]
         public async Task<IActionResult> GetContents(uint DirectoryID)
         {
-            Models.DirectoryContents dc = await _databaseService.GetDirectoryContents(DirectoryID);
-            return Ok(dc);
+            User user = GetUser();
+            if (PermissionChecker.AllowedToView(user, DirectoryID, _databaseService))
+            {
+                Models.DirectoryContents dc = await _databaseService.GetDirectoryContents(DirectoryID);
+                return Ok(dc); 
+            }
+            else { return Unauthorized(); }
         }
 
         /// <summary>
@@ -92,8 +126,13 @@ namespace HomeCloud_Server.Controllers
         [HttpGet("RenameDirectory")]
         public async Task<IActionResult> RenameDirectory(uint DirectoryID, string NewName)
         {
-            await _databaseService.RenameDirectoryAsync(DirectoryID, NewName);
-            return Ok();
+            User user = GetUser();
+            if (PermissionChecker.AllowedToEdit(DirectoryID, user.UserID, _databaseService))
+            {
+                await _databaseService.RenameDirectoryAsync(DirectoryID, NewName);
+                return Ok(); 
+            }
+            else { return Unauthorized(); }
         }
 
 
@@ -105,23 +144,52 @@ namespace HomeCloud_Server.Controllers
         [HttpDelete("DeleteDirectory")]
         public async Task<IActionResult> DeleteDirectory(uint DirectoryID)
         {
-            //Check dir is empty
-            //no files contained
-            List<Models.Directory> containedDirs = await _databaseService.GetSubdirectoriesAsync(DirectoryID);
-            //no directories contained
-            List<Models.File> containedFiles = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
+            User user = GetUser();
+            if (PermissionChecker.AllowedToDelete(DirectoryID, user.UserID, _databaseService))
+            {
+                //Check dir is empty
+                //no files contained
+                List<Models.Directory> containedDirs = await _databaseService.GetSubdirectoriesAsync(DirectoryID);
+                //no directories contained
+                List<Models.File> containedFiles = await _databaseService.GetAllFilesInDirAsync(DirectoryID);
 
-            //Check empty
-            if(containedDirs.Count == 0 && containedFiles.Count == 0)
-            {
-                //Delete it
-                await _databaseService.DeleteDirectoryAsync(DirectoryID);
-                return Ok();
+                //Check empty
+                if (containedDirs.Count == 0 && containedFiles.Count == 0)
+                {
+                    //Delete it
+                    await _databaseService.DeleteDirectoryAsync(DirectoryID);
+                    return Ok();
+                }
+                else
+                {
+                    return Conflict("There were files or folders present in the directory. Please remove these and try again");
+                } 
             }
-            else
+            else { return Unauthorized(); }
+        }
+
+
+        [HttpGet("ChangeUserDirectoryPermissions")]
+        public async Task<IActionResult> ChangeUserDirectoryPermissions(int UserID, uint DirectoryID, bool CC, bool CV, bool CE, bool CD)
+        {
+            User user = GetUser();
+            if(PermissionChecker.AllowedToEdit(DirectoryID, user.UserID, _databaseService))
             {
-                return Conflict("There were files or folders present in the directory. Please remove these and try again");
+                //Check if there are any existing permissions
+                List<Models.DirectoryAccessRights> perms = _databaseService.GetUserDirectoryPermissions(DirectoryID, UserID);
+                if(perms.Count != 0)
+                {
+                    _databaseService.UpdateExistingDirectoryPermission(perms[0].DirectoryAccessRightsID, CC, CV, CE, CD);
+                    return Ok();
+                }
+                //Create permissions if there were none
+                else
+                {
+                    _databaseService.CreateDirectoryPermission(DirectoryID, UserID, CC, CV, CE, CD);
+                    return Ok();
+                }
             }
+            else{   return Unauthorized();  }
         }
     }
 }

@@ -41,7 +41,7 @@ namespace HomeCloud_Server.Controllers
         /// <param name="ParentDirectoryID"></param>
         /// <returns></returns>
         [HttpGet("CreateUser")]
-        public async Task<IActionResult> CreateDirectory(string UserName, string EmailAddress, string Password)
+        public async Task<IActionResult> CreateUser(string UserName, string EmailAddress, string Password)
         {
             //Hash password before it ever gets used
             Password = GenerateHashedValue(Password);
@@ -57,6 +57,13 @@ namespace HomeCloud_Server.Controllers
             _databaseService.CreateNewUser(user);
 
             return Ok();
+        }
+
+        [HttpGet("GetUser")]
+        public async Task<IActionResult> GetUser(ulong UserID)
+        {
+            Models.User user = _databaseService.GetUser(UserID);
+            return Ok(user);
         }
 
         //[HttpGet("LoginUser")]

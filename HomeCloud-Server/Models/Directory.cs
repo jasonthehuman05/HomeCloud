@@ -15,5 +15,8 @@ namespace HomeCloud_Server.Models
 
         [MySqlColumn("CreatedOn", false)]
         public ulong CreatedOn { get; set; }
+        
+        [MySqlColumn("OwnerID", false)]
+        public int OwnerID { get; set; }
     }
 }
