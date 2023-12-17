@@ -23,7 +23,14 @@ namespace HomeCloud_Server.Controllers
             _databaseService = databaseService;
             _configService = configurationService;
         }
-        
+
+        private User GetUser()
+        {
+            string token = Request.Headers["ApiKey"];
+            User user = _databaseService.GetUserFromToken(token);
+            return user;
+        }
+
         /// <summary>
         /// Takes an upload of files and stores them for use
         /// </summary>
@@ -125,6 +132,18 @@ namespace HomeCloud_Server.Controllers
             List<Models.File> fileList = await _databaseService.GetAllFilesAsync(FileName);
             //Return list to the client
             return Ok(fileList);
+        }
+
+        /// <summary>
+        /// Renames a directory using the provided ID
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        [HttpGet("RenameFile")]
+        public async Task<IActionResult> RenanmeFile(uint FileID, string NewName)
+        {
+            await _databaseService.RenameFileAsync(FileID, NewName);
+            return Ok();
         }
 
         /// <summary>

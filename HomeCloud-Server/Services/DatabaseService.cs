@@ -70,6 +70,12 @@ namespace HomeCloud_Server.Services
             return;
         }
 
+        internal Task RenameFileAsync(uint fileID, string newName)
+        {
+            di.NonQueryCommand($"UPDATE tblfiles SET FileName='{newName}' WHERE FileID={fileID};");
+            return Task.CompletedTask;
+        }
+
         public async void DeleteFileAsync(int FileID)
         {
             di.NonQueryCommand($"DELETE FROM tblfiles WHERE FileID={FileID};");
@@ -226,6 +232,7 @@ namespace HomeCloud_Server.Services
             };
             di.InsertData<DirectoryAccessRights>("tbldirectoryaccessrights", dir);
         }
+
 
         #endregion
     }
